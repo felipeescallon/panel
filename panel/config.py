@@ -106,6 +106,10 @@ class _config(_base_config):
         'scale_width', 'scale_height', 'scale_both', None], doc="""
         Specify the default sizing mode behavior of panels.""")
 
+    template = param.ObjectSelector(
+        default=None, doc="""
+        The default template to render served applications into.""")
+
     _comms = param.ObjectSelector(
         default='default', objects=['default', 'ipywidgets', 'vscode', 'colab'], doc="""
         Whether to render output in Jupyter with the default Jupyter
@@ -468,6 +472,8 @@ class panel_extension(_pyviz_extension):
                 getattr(config, k).extend(v)
             elif k == 'js_files':
                 getattr(config, k).update(v)
+            elif k == 'template':
+                config.template = config.param.template.names[v]
             else:
                 setattr(config, k, v)
 
