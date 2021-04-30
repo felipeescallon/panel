@@ -106,9 +106,11 @@ class _config(_base_config):
         'scale_width', 'scale_height', 'scale_both', None], doc="""
         Specify the default sizing mode behavior of panels.""")
 
-    template = param.ObjectSelector(
-        default=None, doc="""
+    template = param.ObjectSelector(default=None, doc="""
         The default template to render served applications into.""")
+
+    theme = param.ObjectSelector(default='default', objects=['default', 'dark'], doc="""
+        The theme to apply to the selected global template.""")
 
     _comms = param.ObjectSelector(
         default='default', objects=['default', 'ipywidgets', 'vscode', 'colab'], doc="""
@@ -189,6 +191,12 @@ class _config(_base_config):
             self.param.set_param(**dict(values))
             for k, v in overrides:
                 setattr(self, k+'_', v)
+
+    @param.depends('template', watch=True)
+    def _select_template(self):
+        if isinstance(self.template, str):
+            with param.discard_events(self):
+                self.template = self.param.template.names[self.template]
 
     @property
     def _doc_build(self):
@@ -472,8 +480,6 @@ class panel_extension(_pyviz_extension):
                 getattr(config, k).extend(v)
             elif k == 'js_files':
                 getattr(config, k).update(v)
-            elif k == 'template':
-                config.template = config.param.template.names[v]
             else:
                 setattr(config, k, v)
 
